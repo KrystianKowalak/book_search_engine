@@ -24,7 +24,7 @@ const resolvers = {
         throw AuthenticationError;
       }
 
-      const correctPw = await User.isCorrectPassword(password);
+      const correctPw = await user.isCorrectPassword(password);
 
       if (!correctPw) {
         throw AuthenticationError;
@@ -52,7 +52,7 @@ const resolvers = {
       if (context.user) {
         return User.findOneAndUpdate(
           { _id: context.user._id },
-          { $pull: { savedBooks: bookId } },
+          { $pull: { savedBooks: { bookId } } },
           { new: true }
         );
       }

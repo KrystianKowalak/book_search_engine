@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import {
   Container,
   Card,
@@ -9,7 +8,7 @@ import {
 
 import { useQuery, useMutation } from '@apollo/client';
 import { QUERY_GET_SINGLE_USER } from '../utils/queries';
-import { REMOVE_BOOK } from '../utils/mutations';
+import { DELETE_BOOK } from '../utils/mutations';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
@@ -22,41 +21,14 @@ const SavedBooks = () => {
       },
     },
   });
-  const [removeBook] = useMutation(REMOVE_BOOK);
+  const [removeBook] = useMutation(DELETE_BOOK);
 
+  // if data isn't here yet, say so
   if (loading) {
     return <h2>LOADING...</h2>;
   }
 
   const userData = data.getSingleUser;
-
-  // // use this to determine if `useEffect()` hook needs to run again
-  // const userDataLength = Object.keys(userData).length;
-
-  // useEffect(() => {
-  //   const getUserData = async () => {
-  //     try {
-  //       const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-  //       if (!token) {
-  //         return false;
-  //       }
-
-  //       const response = await getMe(token);
-
-  //       if (!response.ok) {
-  //         throw new Error('something went wrong!');
-  //       }
-
-  //       const user = await response.json();
-  //       setUserData(user);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-
-  //   getUserData();
-  // }, [userDataLength]);
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -73,24 +45,20 @@ const SavedBooks = () => {
         throw new Error('something went wrong!');
       }
 
-      const updatedUser = await data.removeBook;
+      const updatedUser = await data.deleteBook;
+      console.log(updatedUser);
       // upon success, remove book's id from localStorage
       removeBookId(bookId);
       cache.writeQuery({
         query: QUERY_GET_SINGLE_USER,
         data: {
-          me: updatedUser,
+          getSingleUser: updatedUser,
         },
       });
     } catch (err) {
       console.error(err);
     }
   };
-
-  // if data isn't here yet, say so
-  if (!userDataLength) {
-    return <h2>LOADING...</h2>;
-  }
 
   return (
     <>
